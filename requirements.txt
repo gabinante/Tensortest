@@ -3,3 +3,4 @@ numpy
 scikit-learn
 pandas
 urllib3==1.21.1
+matplotlib
