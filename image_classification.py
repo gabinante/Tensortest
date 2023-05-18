@@ -11,8 +11,8 @@ import logging
 import click
 
 @click.command()
-@click.option('--build', default=False, help='Choose whether to build the model from scratch. If this option is not selected, we will use the tflite model.')
-@click.option('--convert', default=True, help='Convert the model to tflite, to save time between iterations (True/False)')
+@click.option('--build', default=True, help='Choose whether to build the model from scratch. If this option is not selected, we will use the tflite model.')
+@click.option('--convert', default=True, help='Convert the model to tflite. (True/False)')
 @click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
 @click.option('--image_path', default='dataset/sunflower_test.jpg', help='an image to test the model against')
 @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
@@ -123,15 +123,15 @@ def build_model(custom_dataset, num_epochs):
     model = Sequential([
       data_augmentation,
       layers.Rescaling(1./255),
-      layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
-      layers.MaxPooling2D((2, 2)),
-      layers.Conv2D(64, (3, 3), activation='relu'),
+      layers.Conv2D(64, (6, 6), activation='relu', input_shape=(32, 32, 3)),
+      layers.MaxPooling2D((6, 6)),
+      layers.Conv2D(128, (6, 6), activation='relu'),
       layers.MaxPooling2D(),
-      layers.Conv2D(128, (3, 3), activation='relu'),
-      layers.MaxPooling2D((2, 2)),
+      layers.Conv2D(256, (6, 6), activation='relu'),
+      layers.MaxPooling2D((4, 4)),
       layers.Dropout(0.2),
       layers.Flatten(),
-      layers.Dense(256, activation='relu'),
+      layers.Dense(512, activation='relu'),
       layers.Dense(num_classes, name="outputs")
     ])
     logger.debug("Compiling model...")
