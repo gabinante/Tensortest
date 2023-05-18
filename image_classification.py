@@ -196,7 +196,7 @@ def test_image(image_path, model, convert, tflite_model_path, class_names):
         print(f'signature list: {signature_list}')
         signature_name = list(signature_list.keys())[0]
         print(signature_name)
-        classify_lite = interpreter.get_signature_runner(f'{signature_list[signature_name]}')
+        classify_lite = interpreter.get_signature_runner(f'{signature_name}')
 
         predictions_lite = classify_lite(inputs=img_array)['outputs']
         score_lite = tf.nn.softmax(predictions_lite)
