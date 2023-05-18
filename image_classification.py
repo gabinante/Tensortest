@@ -194,16 +194,16 @@ def test_image(image_path, model, training, tflite_model_path):
 
         signature_list = interpreter.get_signature_list()
         signature_name = signature_list.list_keys()[0]
-        classify_lite = interpreter.get_signature_runner(signature_list[signature_name])
-
-        predictions_lite = classify_lite(f"{signature_list[signature_name]['inputs']}"=img_array)['outputs']
-        score_lite = tf.nn.softmax(predictions_lite)
-        print(
-            "This image most likely belongs to {} with a {:.2f} percent confidence."
-            .format(class_names[np.argmax(score_lite)], 100 * np.max(score_lite))
-        )
-
-        print(np.max(np.abs(predictions - predictions_lite)))
+        # classify_lite = interpreter.get_signature_runner(signature_list[signature_name])
+        #
+        # predictions_lite = classify_lite(=img_array)['outputs']
+        # score_lite = tf.nn.softmax(predictions_lite)
+        # print(
+        #     "This image most likely belongs to {} with a {:.2f} percent confidence."
+        #     .format(class_names[np.argmax(score_lite)], 100 * np.max(score_lite))
+        # )
+        #
+        # print(np.max(np.abs(predictions - predictions_lite)))
 
 def convert_model(model):
     # Convert the model.
