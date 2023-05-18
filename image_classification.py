@@ -31,9 +31,6 @@ def classify(build, training, tflite_model_path, image_path, dataset_directory):
     # See how we did
     publish_results(results)
 
-
-def ingest_dataset(custom_dataset):
-
 def build_model(custom_dataset):
     ''' Construct a tensorflow model from scratch using a specified training set '''
 
