@@ -153,7 +153,7 @@ def build_model(custom_dataset, num_epochs):
     loss = history.history['loss']
     val_loss = history.history['val_loss']
 
-    epochs_range = range(epochs)
+    epochs_range = range(num_epochs)
 
     plt.figure(figsize=(8, 8))
     plt.subplot(1, 2, 1)
