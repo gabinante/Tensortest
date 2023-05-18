@@ -125,15 +125,15 @@ def build_model(custom_dataset, num_epochs):
     model = Sequential([
         data_augmentation,  # Data augmentation to generate additional training samples
         layers.Rescaling(1./255),  # Rescale pixel values from [0, 255] to [0, 1]
-        layers.Conv2D(256, (3, 3), activation='relu', input_shape=(64, 64, 3)),  # x filters with a 3x3 kernel
+        layers.Conv2D(128, (3, 3), activation='relu', input_shape=(180, 180, 3)),  # x filters with a 3x3 kernel
         layers.MaxPooling2D((3, 3)),  # Max pooling with a 3x3 pool size
-        layers.Conv2D(512, (4, 4), activation='relu'),  # x filters with a 4x4 kernel
+        layers.Conv2D(256, (4, 4), activation='relu'),  # x filters with a 4x4 kernel
         layers.MaxPooling2D(),  # Default pool size (2x2) for the previous layer output
-        layers.Conv2D(1028, (6, 6), activation='relu'),  # x filters with a 6x6 kernel, ReLU activation
+        layers.Conv2D(512, (6, 6), activation='relu'),  # x filters with a 6x6 kernel, ReLU activation
         layers.MaxPooling2D((2, 2)),  # Max pooling with a 2x2 pool size
         layers.Dropout(0.2),  # Dropout layer with a 20% dropout rate to reduce overfitting
         layers.Flatten(),  # Flatten the output from the previous layer
-        layers.Dense(2056, activation='relu'),  # Fully connected layer with x units, ReLU activation
+        layers.Dense(1028, activation='relu'),  # Fully connected layer with x units, ReLU activation
         layers.Dense(num_classes, name="outputs")  # Output layer with num_classes units, representing the predicted class probabilities
     ])
     logger.debug("Compiling model...")
@@ -183,6 +183,8 @@ def test_image(image_path, keras_model, tflite_model, build, convert, tflite_mod
     )
     img_array = tf.keras.utils.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
+
+
 
     if build:
         # test using keras model
