@@ -18,7 +18,7 @@ import click
 @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
 def classify(build, training, tflite_model_path, image, dataset_directory):
     # First, ingest a given dataset.
-    training_set = ingest_dataset()
+    training_set = ingest_dataset(dataset_directory)
     # next, build the model if the flag is selected. Otherwise we will use the tflite model.
     if build == True:
         image_model = build_model(training_set)
@@ -31,7 +31,7 @@ def classify(build, training, tflite_model_path, image, dataset_directory):
     publish_results(results)
 
 
-def ingest_dataset():
+def ingest_dataset(custom_dataset):
     if custom_dataset == False:
         dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
         data_dir = tf.keras.utils.get_file('flower_photos.tar', origin=dataset_url, extract=True)
