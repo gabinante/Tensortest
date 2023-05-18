@@ -11,7 +11,7 @@ import logging
 import click
 
 
-def run():
+def classify():
     # First, ingest a given dataset.
     training_set = ingest_dataset()
     # next, build the model if the flag is selected. Otherwise we will use the tflite model.
@@ -36,7 +36,7 @@ def ingest_dataset():
     data_dir = pathlib.Path(data_dir).with_suffix('')
 
     image_count = len(list(data_dir.glob('*/*.jpg')))
-    classification_count = len(list(data_dir.glob('*'))
+    classification_count = len(list(data_dir.glob('*')))
     logging.debug(f'training set includes {image_count} images spanning {classification_count} classifications')
     return data_dir
 
@@ -193,7 +193,7 @@ def test_image(image_path, model):
 
         print(np.max(np.abs(predictions - predictions_lite)))
 
-def convert_model(model)
+def convert_model(model):
     # Convert the model.
     logger.debug("converting to tflite model")
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
@@ -212,4 +212,6 @@ if __name__ == '__main__':
     @click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
     @click.option('--image', default='dataset/sunflower_test.jpg', help='an image to test the model against')
     @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
-    run()
+
+    logger.debug('lets go!')
+    classify()
