@@ -54,7 +54,7 @@ def build_model(custom_dataset, num_epochs):
     logging.debug(f'training set includes {image_count} images spanning {classification_count} classifications')
 
     # loader parameters. we should probably not hard code these
-    batch_size = 8
+    batch_size = 2
     img_height = 180
     img_width = 180
 
@@ -175,7 +175,7 @@ def build_model(custom_dataset, num_epochs):
     return model, class_names
 
 def test_image(image_path, keras_model, tflite_model, build, convert, tflite_model_path, class_names):
-    batch_size = 8
+    batch_size = 2
     img_height = 180
     img_width = 180
     img = tf.keras.utils.load_img(
