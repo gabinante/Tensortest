@@ -194,9 +194,9 @@ def test_image(image_path, model, build, convert, tflite_model_path, class_names
         interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
 
         signature_list = interpreter.get_signature_list()
-        print(f'signature list: {signature_list}')
+        logger.debug(f'signature list: {signature_list}')
         signature_name = list(signature_list.keys())[0]
-        print(signature_name)
+        logger.debug(signature_name)
         classify_lite = interpreter.get_signature_runner(f'{signature_name}')
 
         predictions_lite = classify_lite(sequential_input=img_array)['outputs']
@@ -209,7 +209,7 @@ def test_image(image_path, model, build, convert, tflite_model_path, class_names
                     class_names = meta_dict['class_names'].decode('utf-8').split('\n')
                     print(class_names)
         except Exception as e:
-            print("couldn't acquire class names, failing back to hand jam")
+            logger.debug('failed to find class names, defaulting to hand-jam')
             class_names = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
         print(
             "This image most likely belongs to {} with a {:.2f} percent confidence."
