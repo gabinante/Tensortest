@@ -12,22 +12,26 @@ import click
 
 @click.command()
 @click.option('--build', default=False, help='Choose whether to build the model from scratch. If this option is not selected, we will use the tflite model.')
-@click.option('--training', default=False, help='do not convert the model to tflite, to save time between iterations')
+@click.option('--convert', default=True, help='Convert the model to tflite, to save time between iterations (True/False)')
 @click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
 @click.option('--image_path', default='dataset/sunflower_test.jpg', help='an image to test the model against')
 @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
-def classify(build, training, tflite_model_path, image_path, dataset_directory):
+def classify(build, convert, tflite_model_path, image_path, dataset_directory):
     # First, build the model if the flag is selected. Otherwise we will use the tflite model.
-    # if build is false and training is false
+    # if build is false and convert is true
+    # True True √
+    # False True can't build a model out of nothing
+    # False False use existing model
+    # True False training mode for fast iterations
     if build == True:
         image_model, class_names = build_model(dataset_directory)
     # Then, convert the model to a tflite model unless we are in training mode.
-        if training == False:
+        if convert == True:
             image_model = convert_model(image_model)
-    if training == False:
-        image_model = 'default'
+    elif build == False and convert == False:
+        image_model = tflite_model_path
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model, training, tflite_model_path, class_names)
+    results = test_image(image_path, image_model, convert, tflite_model_path, class_names)
     # See how we did
     # publish_results(results)
 
@@ -166,7 +170,7 @@ def build_model(custom_dataset):
 
     return model, class_names
 
-def test_image(image_path, model, training, tflite_model_path, class_names):
+def test_image(image_path, model, convert, tflite_model_path, class_names):
     batch_size = 32
     img_height = 180
     img_width = 180
@@ -176,7 +180,7 @@ def test_image(image_path, model, training, tflite_model_path, class_names):
     img_array = tf.keras.utils.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-    if training:
+    if not convert:
         # test using keras model
         predictions = model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
