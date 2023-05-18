@@ -17,12 +17,10 @@ import click
 @click.option('--image_path', default='dataset/sunflower_test.jpg', help='an image to test the model against')
 @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
 def classify(build, training, tflite_model_path, image_path, dataset_directory):
-    # First, ingest a given dataset.
-    training_set = ingest_dataset(dataset_directory)
-    # next, build the model if the flag is selected. Otherwise we will use the tflite model.
+    # First, build the model if the flag is selected. Otherwise we will use the tflite model.
     # if build is false and training is false
     if build == True:
-        image_model = build_model(training_set)
+        image_model = build_model(dataset_directory)
     # Then, convert the model to a tflite model unless we are in training mode.
         if training == False:
             image_model = convert_model(image_model)
@@ -35,6 +33,10 @@ def classify(build, training, tflite_model_path, image_path, dataset_directory):
 
 
 def ingest_dataset(custom_dataset):
+
+def build_model(custom_dataset):
+    ''' Construct a tensorflow model from scratch using a specified training set '''
+
     if custom_dataset == False:
         dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
         data_dir = tf.keras.utils.get_file('flower_photos.tar', origin=dataset_url, extract=True)
@@ -46,10 +48,6 @@ def ingest_dataset(custom_dataset):
     image_count = len(list(data_dir.glob('*/*.jpg')))
     classification_count = len(list(data_dir.glob('*')))
     logging.debug(f'training set includes {image_count} images spanning {classification_count} classifications')
-    return data_dir
-
-def build_model(training_set):
-    ''' Construct a tensorflow model from scratch using a specified training set '''
 
     # loader parameters. we should probably not hard code these
     batch_size = 32
