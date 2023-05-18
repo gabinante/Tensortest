@@ -118,18 +118,19 @@ def build_model(custom_dataset, num_epochs):
     #     plt.axis("off")
 
     # RGB uses 255 channels which is suboptimal. use keras Rescaling to normalize.
+    # Tweaking to add additional convolutional and fully connected layers.
     model = Sequential([
       data_augmentation,
       layers.Rescaling(1./255),
-      layers.Conv2D(16, 3, padding='same', activation='relu'),
+      layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+      layers.MaxPooling2D((2, 2)),
+      layers.Conv2D(64, (3, 3), activation='relu')),
       layers.MaxPooling2D(),
-      layers.Conv2D(32, 3, padding='same', activation='relu'),
-      layers.MaxPooling2D(),
-      layers.Conv2D(64, 3, padding='same', activation='relu'),
-      layers.MaxPooling2D(),
+      layers.Conv2D(128, (3, 3), activation='relu')),
+      layers.MaxPooling2D((2, 2)),
       layers.Dropout(0.2),
       layers.Flatten(),
-      layers.Dense(128, activation='relu'),
+      layers.Dense(256, activation='relu'),
       layers.Dense(num_classes, name="outputs")
     ])
     logger.debug("Compiling model...")
