@@ -200,6 +200,16 @@ def test_image(image_path, model, build, convert, tflite_model_path, class_names
 
         predictions_lite = classify_lite(sequential_input=img_array)['outputs']
         score_lite = tf.nn.softmax(predictions_lite)
+        try:
+            model_meta = interpreter.get_tensor_details()[0]['metadata']
+            meta_dict = model_meta.get('metadata')
+            if meta_dict is not None:
+                if 'class_names' in meta_dict:
+                    class_names = meta_dict['class_names'].decode('utf-8').split('\n')
+                    print(class_names)
+        except Exception as e:
+            print("couldn't acquire class names, failing back to hand jam")
+            class_names = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
         print(
             "This image most likely belongs to {} with a {:.2f} percent confidence."
             .format(class_names[np.argmax(score_lite)], 100 * np.max(score_lite))
