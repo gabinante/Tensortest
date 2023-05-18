@@ -25,15 +25,16 @@ def classify(build, convert, tflite_model_path, image_path, dataset_directory, n
     # False False use existing model
     # True False training mode for fast iterations
     if build == True:
-        image_model, class_names = build_model(dataset_directory, num_epochs)
+        keras_model, class_names = build_model(dataset_directory, num_epochs)
     # Then, convert the model to a tflite model unless we are in training mode.
         if convert == True:
-            image_model = convert_model(image_model)
+            tflite_model = convert_model(keras_model)
     elif build == False and convert == False:
-        image_model = tflite_model_path
+        keras_model = None
+        tflite_model = tflite_model_path
         class_names = None
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model, build, convert, tflite_model_path, class_names)
+    results = test_image(image_path, keras_model, tflite_model, build, convert, tflite_model_path, class_names)
     # See how we did
     # publish_results(results)
 
@@ -171,7 +172,7 @@ def build_model(custom_dataset, num_epochs):
 
     return model, class_names
 
-def test_image(image_path, model, build, convert, tflite_model_path, class_names):
+def test_image(image_path, keras_model, tflite_model, build, convert, tflite_model_path, class_names):
     batch_size = 32
     img_height = 180
     img_width = 180
@@ -183,7 +184,7 @@ def test_image(image_path, model, build, convert, tflite_model_path, class_names
 
     if build:
         # test using keras model
-        predictions = model.predict(img_array)
+        predictions = keras_model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
 
         print(
