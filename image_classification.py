@@ -33,7 +33,7 @@ def classify(build, convert, tflite_model_path, image_path, dataset_directory, n
         image_model = tflite_model_path
         class_names = None
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model, build, tflite_model_path, class_names)
+    results = test_image(image_path, image_model, build, convert, tflite_model_path, class_names)
     # See how we did
     # publish_results(results)
 
@@ -170,7 +170,7 @@ def build_model(custom_dataset, num_epochs):
 
     return model, class_names
 
-def test_image(image_path, model, build, tflite_model_path, class_names):
+def test_image(image_path, model, build, convert tflite_model_path, class_names):
     batch_size = 32
     img_height = 180
     img_width = 180
