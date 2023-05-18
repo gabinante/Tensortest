@@ -29,7 +29,7 @@ def classify(build, training, tflite_model_path, image_path, dataset_directory):
     if training == False:
         image_model = 'default'
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model, training)
+    results = test_image(image_path, image_model, training, tflite_model_path)
     # See how we did
     publish_results(results)
 
@@ -170,7 +170,7 @@ def build_model(training_set):
     plt.show()
 
 
-def test_image(image_path, model, training):
+def test_image(image_path, model, training, tflite_model_path):
     batch_size = 32
     img_height = 180
     img_width = 180
