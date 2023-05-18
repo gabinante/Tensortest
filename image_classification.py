@@ -16,7 +16,7 @@ import click
 @click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
 @click.option('--image', default='dataset/sunflower_test.jpg', help='an image to test the model against')
 @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
-def classify():
+def classify(build, training, tflite_model_path, image, dataset_directory):
     # First, ingest a given dataset.
     training_set = ingest_dataset()
     # next, build the model if the flag is selected. Otherwise we will use the tflite model.
