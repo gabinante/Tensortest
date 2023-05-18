@@ -196,7 +196,7 @@ def test_image(image_path, model, training, tflite_model_path):
         signature_name = signature_list.list_keys()[0]
         classify_lite = interpreter.get_signature_runner(signature_list[signature_name])
 
-        predictions_lite = classify_lite(signature_list[signature_name]['inputs']=img_array)['outputs']
+        predictions_lite = classify_lite(f"{signature_list[signature_name]['inputs']}"=img_array)['outputs']
         score_lite = tf.nn.softmax(predictions_lite)
         print(
             "This image most likely belongs to {} with a {:.2f} percent confidence."
