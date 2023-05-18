@@ -139,7 +139,7 @@ def build_model(custom_dataset):
     model.summary()
 
     # train for 15 epochs
-    epochs = 1
+    epochs = 15
     history = model.fit(
       train_ds,
       validation_data=val_ds,
@@ -205,7 +205,8 @@ def test_image(image_path, model, convert, tflite_model_path, class_names):
             .format(class_names[np.argmax(score_lite)], 100 * np.max(score_lite))
         )
 
-        print(np.max(np.abs(predictions - predictions_lite)))
+        # # calculate the difference between the models
+        # print(np.max(np.abs(predictions - predictions_lite)))
 
 def convert_model(model):
     # Convert the model.
