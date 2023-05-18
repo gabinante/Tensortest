@@ -193,7 +193,7 @@ def test_image(image_path, model, convert, tflite_model_path, class_names):
         interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
 
         signature_list = interpreter.get_signature_list()
-        signature_name = signature_list.list_keys()[0]
+        signature_name = list(signature_list.keys())[0]
         classify_lite = interpreter.get_signature_runner(f'{signature_list[signature_name]}')
 
         predictions_lite = classify_lite(inputs=img_array)['outputs']
