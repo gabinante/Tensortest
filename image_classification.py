@@ -20,14 +20,14 @@ def classify(build, training, tflite_model_path, image_path, dataset_directory):
     # First, build the model if the flag is selected. Otherwise we will use the tflite model.
     # if build is false and training is false
     if build == True:
-        image_model = build_model(dataset_directory)
+        image_model, class_names = build_model(dataset_directory)
     # Then, convert the model to a tflite model unless we are in training mode.
         if training == False:
             image_model = convert_model(image_model)
     if training == False:
         image_model = 'default'
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model, training, tflite_model_path)
+    results = test_image(image_path, image_model, training, tflite_model_path, class_names)
     # See how we did
     # publish_results(results)
 
@@ -135,7 +135,7 @@ def build_model(custom_dataset):
     model.summary()
 
     # train for 15 epochs
-    epochs = 10
+    epochs = 1
     history = model.fit(
       train_ds,
       validation_data=val_ds,
@@ -164,9 +164,9 @@ def build_model(custom_dataset):
     plt.title('Training and Validation Loss')
     plt.show()
 
-    return model
+    return model, class_names
 
-def test_image(image_path, model, training, tflite_model_path):
+def test_image(image_path, model, training, tflite_model_path, class_names):
     batch_size = 32
     img_height = 180
     img_width = 180
@@ -190,16 +190,16 @@ def test_image(image_path, model, training, tflite_model_path):
 
         signature_list = interpreter.get_signature_list()
         signature_name = signature_list.list_keys()[0]
-        # classify_lite = interpreter.get_signature_runner(signature_list[signature_name])
-        #
-        # predictions_lite = classify_lite(=img_array)['outputs']
-        # score_lite = tf.nn.softmax(predictions_lite)
-        # print(
-        #     "This image most likely belongs to {} with a {:.2f} percent confidence."
-        #     .format(class_names[np.argmax(score_lite)], 100 * np.max(score_lite))
-        # )
-        #
-        # print(np.max(np.abs(predictions - predictions_lite)))
+        classify_lite = interpreter.get_signature_runner(f'{signature_list[signature_name]}')
+
+        predictions_lite = classify_lite(inputs=img_array)['outputs']
+        score_lite = tf.nn.softmax(predictions_lite)
+        print(
+            "This image most likely belongs to {} with a {:.2f} percent confidence."
+            .format(class_names[np.argmax(score_lite)], 100 * np.max(score_lite))
+        )
+
+        print(np.max(np.abs(predictions - predictions_lite)))
 
 def convert_model(model):
     # Convert the model.
