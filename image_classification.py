@@ -10,7 +10,12 @@ import pathlib
 import logging
 import click
 
-
+@click.command()
+@click.option('--build', default=False, help='Choose whether to build the model from scratch. If this option is not selected, we will use the tflite model.')
+@click.option('--training', default=False, help='do not convert the model to tflite, to save time between iterations')
+@click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
+@click.option('--image', default='dataset/sunflower_test.jpg', help='an image to test the model against')
+@click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
 def classify():
     # First, ingest a given dataset.
     training_set = ingest_dataset()
@@ -206,12 +211,4 @@ def convert_model(model):
 
 if __name__ == '__main__':
     logger=logging.getLogger()
-    @click.command()
-    @click.option('--build', default=False, help='Choose whether to build the model from scratch. If this option is not selected, we will use the tflite model.')
-    @click.option('--training', default=False, help='do not convert the model to tflite, to save time between iterations')
-    @click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
-    @click.option('--image', default='dataset/sunflower_test.jpg', help='an image to test the model against')
-    @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
-
-    logger.debug('lets go!')
     classify()
