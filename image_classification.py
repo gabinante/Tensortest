@@ -170,7 +170,7 @@ def build_model(custom_dataset, num_epochs):
 
     return model, class_names
 
-def test_image(image_path, model, build, convert tflite_model_path, class_names):
+def test_image(image_path, model, build, convert, tflite_model_path, class_names):
     batch_size = 32
     img_height = 180
     img_width = 180
