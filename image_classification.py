@@ -16,7 +16,8 @@ import click
 @click.option('--tflite_model_path', default='model.tflite', help='a path to a custom tflite model')
 @click.option('--image_path', default='dataset/sunflower_test.jpg', help='an image to test the model against')
 @click.option('--dataset_directory', default=False, help='Specify a directory from which to retrieve a dataset')
-def classify(build, convert, tflite_model_path, image_path, dataset_directory):
+@click.option('--num_epochs', default=10, help='customize the number of training iterations')
+def classify(build, convert, tflite_model_path, image_path, dataset_directory, num_epochs):
     # First, build the model if the flag is selected. Otherwise we will use the tflite model.
     # if build is false and convert is true
     # True True √
@@ -30,12 +31,13 @@ def classify(build, convert, tflite_model_path, image_path, dataset_directory):
             image_model = convert_model(image_model)
     elif build == False and convert == False:
         image_model = tflite_model_path
+        class_names = None
     # Now, test a given image against our trained model
     results = test_image(image_path, image_model, convert, tflite_model_path, class_names)
     # See how we did
     # publish_results(results)
 
-def build_model(custom_dataset):
+def build_model(custom_dataset, num_epochs):
     ''' Construct a tensorflow model from scratch using a specified training set '''
 
     if custom_dataset == False:
@@ -138,12 +140,10 @@ def build_model(custom_dataset):
     # Show all the model layers
     model.summary()
 
-    # train for 15 epochs
-    epochs = 15
     history = model.fit(
       train_ds,
       validation_data=val_ds,
-      epochs=epochs
+      epochs=num_epochs
     )
 
     acc = history.history['accuracy']
