@@ -20,13 +20,16 @@ def classify(build, training, tflite_model_path, image, dataset_directory):
     # First, ingest a given dataset.
     training_set = ingest_dataset(dataset_directory)
     # next, build the model if the flag is selected. Otherwise we will use the tflite model.
+    # if build is false and training is false
     if build == True:
         image_model = build_model(training_set)
     # Then, convert the model to a tflite model unless we are in training mode.
-    if not training:
-        image_model = convert_model(image_model)
+        if training == False:
+            image_model = convert_model(image_model)
+    if training == False:
+        image_model = 'default'
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model)
+    results = test_image(image_path, image_model, training)
     # See how we did
     publish_results(results)
 
@@ -167,7 +170,7 @@ def build_model(training_set):
     plt.show()
 
 
-def test_image(image_path, model):
+def test_image(image_path, model, training):
     img = tf.keras.utils.load_img(
         image_path, target_size=(img_height, img_width)
     )
