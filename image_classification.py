@@ -51,7 +51,7 @@ def ingest_dataset(custom_dataset):
 def build_model(training_set):
     ''' Construct a tensorflow model from scratch using a specified training set '''
 
-    # loader parameters
+    # loader parameters. we should probably not hard code these
     batch_size = 32
     img_height = 180
     img_width = 180
@@ -171,6 +171,9 @@ def build_model(training_set):
 
 
 def test_image(image_path, model, training):
+    batch_size = 32
+    img_height = 180
+    img_width = 180
     img = tf.keras.utils.load_img(
         image_path, target_size=(img_height, img_width)
     )
