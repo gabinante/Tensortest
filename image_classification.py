@@ -29,7 +29,7 @@ def classify(build, training, tflite_model_path, image_path, dataset_directory):
     # Now, test a given image against our trained model
     results = test_image(image_path, image_model, training, tflite_model_path)
     # See how we did
-    publish_results(results)
+    # publish_results(results)
 
 def build_model(custom_dataset):
     ''' Construct a tensorflow model from scratch using a specified training set '''
@@ -135,7 +135,7 @@ def build_model(custom_dataset):
     model.summary()
 
     # train for 15 epochs
-    epochs = 15
+    epochs = 10
     history = model.fit(
       train_ds,
       validation_data=val_ds,
@@ -164,6 +164,7 @@ def build_model(custom_dataset):
     plt.title('Training and Validation Loss')
     plt.show()
 
+    return model
 
 def test_image(image_path, model, training, tflite_model_path):
     batch_size = 32
