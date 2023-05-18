@@ -33,7 +33,7 @@ def classify(build, convert, tflite_model_path, image_path, dataset_directory, n
         image_model = tflite_model_path
         class_names = None
     # Now, test a given image against our trained model
-    results = test_image(image_path, image_model, convert, tflite_model_path, class_names)
+    results = test_image(image_path, image_model, build, tflite_model_path, class_names)
     # See how we did
     # publish_results(results)
 
@@ -170,7 +170,7 @@ def build_model(custom_dataset, num_epochs):
 
     return model, class_names
 
-def test_image(image_path, model, convert, tflite_model_path, class_names):
+def test_image(image_path, model, build, tflite_model_path, class_names):
     batch_size = 32
     img_height = 180
     img_width = 180
@@ -180,7 +180,7 @@ def test_image(image_path, model, convert, tflite_model_path, class_names):
     img_array = tf.keras.utils.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-    if not convert:
+    if build:
         # test using keras model
         predictions = model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
@@ -189,7 +189,7 @@ def test_image(image_path, model, convert, tflite_model_path, class_names):
             "This image most likely belongs to {} with a {:.2f} percent confidence."
             .format(class_names[np.argmax(score)], 100 * np.max(score))
         )
-    else:
+    if convert == True or build == False and convert == False:
         interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
 
         signature_list = interpreter.get_signature_list()
