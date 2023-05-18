@@ -25,7 +25,7 @@ def classify(build, convert, tflite_model_path, image_path, dataset_directory, n
     # False False use existing model
     # True False training mode for fast iterations
     if build == True:
-        image_model, class_names = build_model(dataset_directory)
+        image_model, class_names = build_model(dataset_directory, num_epochs)
     # Then, convert the model to a tflite model unless we are in training mode.
         if convert == True:
             image_model = convert_model(image_model)
