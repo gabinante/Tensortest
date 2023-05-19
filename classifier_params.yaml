@@ -1,0 +1,18 @@
+convolution_1:
+  value: 128
+  filter_1: 3
+  filter_2: 3
+
+convolution_2: 
+  value: 256
+  filter_1: 4
+  filter_2: 4
+
+convolution_3: 
+  value: 512
+  filter_1: 6
+  filter_2: 6
+
+dropout: 0.2
+
+fully_connected_1: 1028
