@@ -11,6 +11,7 @@ import logging
 import click
 import yaml
 from pathlib import Path
+from tensorflow.keras.applications import VGG16
 
 @click.command()
 @click.option('--build', default=True, help='Choose whether to build the model from scratch. If this option is not selected, we will use the tflite model.')
@@ -21,11 +22,6 @@ from pathlib import Path
 @click.option('--num_epochs', default=10, help='customize the number of training iterations')
 def classify(build, convert, tflite_model_path, image_path, dataset_directory, num_epochs):
     # First, build the model if the flag is selected. Otherwise we will use the tflite model.
-    # if build is false and convert is true
-    # True True √
-    # False True can't build a model out of nothing
-    # False False use existing model
-    # True False training mode for fast iterations
     if build == True:
         keras_model, class_names = build_model(dataset_directory, num_epochs)
     # Then, convert the model to a tflite model unless we are in training mode.
@@ -56,7 +52,7 @@ def build_model(custom_dataset, num_epochs):
     logging.debug(f'training set includes {image_count} images spanning {classification_count} classifications')
 
     # loader parameters. we should probably not hard code these
-    batch_size = 16
+    batch_size = 32
     img_height = 180
     img_width = 180
 
@@ -95,8 +91,6 @@ def build_model(custom_dataset, num_epochs):
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
     val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-    normalization_layer = layers.Rescaling(1./255)
-
     num_classes = len(class_names)
 
     # Data augmentation to solve for overfitting
@@ -111,41 +105,47 @@ def build_model(custom_dataset, num_epochs):
       ]
     )
 
-    # # Print a visual representation of the model
-    # plt.figure(figsize=(10, 10))
-    # for images, _ in train_ds.take(1):
-    #   for i in range(9):
-    #     augmented_images = data_augmentation(images)
-    #     ax = plt.subplot(3, 3, i + 1)
-    #     plt.imshow(augmented_images[0].numpy().astype("uint8"))
-    #     plt.axis("off")
+    # Print a visual representation of the model
+    plt.figure(figsize=(10, 10))
+    for images, _ in train_ds.take(1):
+      for i in range(9):
+        augmented_images = data_augmentation(images)
+        ax = plt.subplot(3, 3, i + 1)
+        plt.imshow(augmented_images[0].numpy().astype("uint8"))
+        plt.axis("off")
 
     
     params = yaml.safe_load(Path('classifier_params.yaml').read_text())
     print(params)
+
+    # Load the pre-trained VGG16 model without the top layers
+    VGG16_model = VGG16(weights='imagenet', include_top=False, input_shape=(180, 180, 3))
+    for layer in VGG16_model.layers:
+        layer.trainable = False
 
     # RGB uses 255 channels which is suboptimal. use keras Rescaling to normalize.
     # Tweaking to add additional convolutional and fully connected layers.
     # We move up our kernel / filters over time to first capture details and Then
     # gather additional macro details in deeper layers.
     model = Sequential([
-        data_augmentation,  # Data augmentation to generate additional training samples
-        layers.Rescaling(1./255),  # Rescale pixel values from [0, 255] to [0, 1]
-        layers.Conv2D(params['convolution_1']['value'], (params['convolution_1']['filter_1'], params['convolution_1']['filter_2']), activation='relu', input_shape=(180, 180, 3)),  # x filters with a 3x3 kernel
-        layers.MaxPooling2D((3, 3)),  # Max pooling with a 3x3 pool size
-        layers.Conv2D(params['convolution_2']['value'], (params['convolution_2']['filter_1'], params['convolution_2']['filter_2']), activation='relu'),  # x filters with a 4x4 kernel
-        layers.MaxPooling2D(),  # Default pool size (2x2) for the previous layer output
-        layers.Conv2D(params['convolution_3']['value'], (params['convolution_3']['filter_1'], params['convolution_3']['filter_2']), activation='relu'),  # x filters with a 6x6 kernel, ReLU activation
-        layers.MaxPooling2D((2, 2)),  # Max pooling with a 2x2 pool size
-        layers.Dropout(params['dropout']),  # Dropout layer with a 20% dropout rate to reduce overfitting
-        layers.Flatten(),  # Flatten the output from the previous layer
-        layers.Dense(params['fully_connected_1'], activation='relu'),  # Fully connected layer with x units, ReLU activation
-        layers.Dense(num_classes, name="outputs")  # Output layer with num_classes units, representing the predicted class probabilities
+        data_augmentation,
+        layers.Rescaling(1./255, input_shape=(180, 180, 3)),
+        VGG16_model,
+        layers.Conv2D(params['convolution_1']['value'], (params['convolution_1']['filter_1'], params['convolution_1']['filter_2']), input_shape=(180, 180, 3), padding='same', activation='relu'),
+        layers.Conv2D(params['convolution_2']['value'], (params['convolution_2']['filter_1'], params['convolution_2']['filter_2']), padding='same', activation='relu'),
+        layers.Conv2D(params['convolution_3']['value'], (params['convolution_3']['filter_1'], params['convolution_3']['filter_2']),padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(params['convolution_3']['value'], (params['convolution_3']['filter_1'], params['convolution_3']['filter_2']), padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Dropout(params['dropout']),
+        layers.Flatten(),
+        layers.Dense(params['fully_connected_1'], activation='relu'),
+        layers.Dense(2056, name="outputs", activation='softmax')  # Output layer with num_classes units, representing the predicted class probabilities
     ])
-    logger.debug("Compiling model...")
+
     model.compile(optimizer='adam',
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                  metrics=['accuracy'])
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                metrics=['accuracy'])
 
     # Show all the model layers
     model.summary()
@@ -181,7 +181,7 @@ def build_model(custom_dataset, num_epochs):
     return model, class_names
 
 def test_image(image_path, keras_model, tflite_model, build, convert, tflite_model_path, class_names):
-    batch_size = 16
+    batch_size = 32
     img_height = 180
     img_width = 180
     img = tf.keras.utils.load_img(
@@ -243,4 +243,5 @@ def convert_model(model):
 
 if __name__ == '__main__':
     logger=logging.getLogger()
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     classify()
